@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Chatbot with PHP</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .wrapper {
+      width: 450px;
+      max-width: 100%;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .title {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-align: center;
+      font-weight: 600;
+      font-size: 20px;
+      padding: 20px;
+      position: relative;
+    }
+
+    .title::before {
+      content: '\f544';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      margin-right: 10px;
+      font-size: 22px;
+    }
+
+    .form {
+      height: 400px;
+      overflow-y: auto;
+      padding: 20px;
+      background: #f8f9fa;
+      position: relative;
+    }
+
+    .form::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .form::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    .form::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+    }
+
+    .form::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
+    .inbox {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .msg-header {
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+
+    .user-inbox {
+      justify-content: flex-end;
+    }
+
+    .user-inbox .msg-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 20px 20px 5px 20px;
+      box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+      position: relative;
+    }
+
+    .bot-inbox {
+      justify-content: flex-start;
+    }
+
+    .bot-inbox .msg-header {
+      background: white;
+      color: #333;
+      padding: 12px 16px;
+      border-radius: 20px 20px 20px 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e9ecef;
+      position: relative;
+    }
+
+    .bot-inbox .msg-header::before {
+      content: '\f544';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      color: #667eea;
+      font-size: 12px;
+      position: absolute;
+      top: -8px;
+      left: 10px;
+      background: white;
+      padding: 2px 6px;
+      border-radius: 10px;
+      border: 1px solid #e9ecef;
+    }
+
+    .msg-header p {
+      margin: 0;
+      line-height: 1.4;
+      font-size: 14px;
+    }
+
+    .typing-field {
+      padding: 20px;
+      background: white;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .input-data {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .input-data input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #e9ecef;
+      border-radius: 25px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    .input-data input:focus {
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .input-data button {
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-data button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .input-data button:active {
+      transform: translateY(0);
+    }
+
+    .input-data button::after {
+      content: '\f1d8';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+    }
+
+    /* Welcome message styling */
+    .bot-inbox:first-child .msg-header {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+    }
+
+    .bot-inbox:first-child .msg-header::before {
+      color: white;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Responsive design */
+    @media (max-width: 480px) {
+      .wrapper {
+        width: 100%;
+        margin: 10px;
+        border-radius: 15px;
+      }
+      
+      .form {
+        height: 350px;
+      }
+      
+      .input-data input {
+        font-size: 16px; /* Prevents zoom on iOS */
+      }
+    }
+
+    /* Animation for new messages */
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .inbox {
+      animation: slideIn 0.3s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="title">AI Assistant</div>
+    <div class="form" id="chatBox">
+      <div class="bot-inbox inbox">
+        <div class="msg-header">
+          <p>Hello there! I'm your AI assistant. How can I help you today?</p>
+        </div>
+      </div>
+    </div>
+    <div class="typing-field">
+      <div class="input-data">
+        <input id="data" type="text" placeholder="Type your message..." required>
+        <button id="send-btn">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function(){
+      $("#send-btn").on("click", function(){
+        let text = $("#data").val();
+        if(text.trim() === '') return; // Prevent empty messages
+        
+        $("#chatBox").append('<div class="user-inbox inbox"><div class="msg-header"><p>'+ text +'</p></div></div>');
+        $("#data").val('');
+
+        $.ajax({
+          url: 'message.php',
+          type: 'POST',
+          data: {text: text},
+          success: function(response){
+            $("#chatBox").append('<div class="bot-inbox inbox"><div class="msg-header"><p>'+ response +'</p></div></div>');
+            $("#chatBox").scrollTop($("#chatBox")[0].scrollHeight);
+          },
+          error: function(xhr){
+            alert("Something went wrong: " + xhr.statusText);
+          }
+        });
+      });
+
+      // Allow Enter key to send messages
+      $("#data").keypress(function(e) {
+        if(e.which == 13) {
+          $("#send-btn").click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
