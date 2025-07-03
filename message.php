@@ -8,7 +8,7 @@ if (!isset($_POST['text']) || empty($_POST['text'])) {
  
 $userMessage = $_POST['text']; 
 
-$apiKey = "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"; 
+$apiKey = "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"; 
 $apiUrl = "https://openrouter.ai/api/v1/chat/completions";
 
 // Set concise and professional tone
